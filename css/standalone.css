@@ -65,7 +65,7 @@ section.help {
 	border-radius: .5em;
 	box-shadow: 1px 1px 1px hsla(0,0%,100%,.15), 1px 1px 1px hsla(0,0%,100%,.15) inset;
 	white-space: normal;
-	vertical-align: bottom;
+	vertical-align: top;
 }
 
 #cheatsheet {

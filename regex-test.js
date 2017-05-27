@@ -56,33 +56,22 @@ var _ = self.RegExpTester = function(container){
 		}
 	], 'start');
 	
-	
-	this.matchIndicator = $u.element.create('div', {
-		properties: {
-			className: 'match indicator'
-		},
-		inside: this.tester.parentNode
-	});
-	
-	this.submatchIndicator = $u.element.create('div', {
-		properties: {
-			className: 'sub match indicator'
-		},
-		inside: this.tester.parentNode
-	});
-	
-	this.matchIndicator.style.display = this.submatchIndicator.style.display = 'none';
-	
-	container.addEventListener('keydown', function(evt) {
-		if (evt.keyCode === 38 || evt.keyCode === 40) {
-			evt.stopPropagation();
-			evt.preventDefault();
-			
-			var method = (evt.keyCode === 40? 'next' : 'prev') +
-			             (evt.ctrlKey? 'Subpattern' : 'Match'); 
-			me[method]();
+	this.setMatchIndicatorsDisplay = function(display) {
+		for (var i = 0; i < this.matchIndicators.length; i++) {
+			this.matchIndicators[i].style.display = display;
 		}
-		
+	}
+
+	this.setSubmatchIndicatorsDisplay = function(display) {
+		for (var i = 0; i < this.submatchIndicators.length; i++) {
+			this.submatchIndicators[i].style.display = display;
+		}
+	}
+
+	this.setMatchIndicatorsDisplay.bind(this, 'none');
+	this.setSubmatchIndicatorsDisplay.bind(this, 'none');	
+	
+	container.addEventListener('keydown', function(evt) {	
 		if (evt.ctrlKey) {
 			if (evt.keyCode === 73) { // I
 				me.toggleFlag('i');
@@ -258,103 +247,125 @@ _.prototype = {
 		this.test();
 	},
 	
-	gotoMatch: function (index) {
-		if(!this.matches.length) {
-			this.matchIndicator.style.display = 'none'; 
-			
-			this.subpatterns = [];
+	gotoMatch: function () {
+		if(!this.matches.length) { 
+			this.setMatchIndicatorsDisplay.bind(this, 'none')
 		}
 		else {
-			var match = this.matches[index];
-			
-			if(match) {
-				var before = this.testStr.substr(0, match.index + 1),
-					lineBreaks = (before.match(/\n|\r/g) || []).length;
-
-				this.positionIndicator(this.matchIndicator, match.index + lineBreaks, match.length);
-				this.matchIndicator.style.display = ''; 
-				
-				this.subpatterns = match.subpatterns.slice() || []; // slice for cloning
+			for (var i = 0; i < this.matches.length; i++) {
+				var match = this.matches[i];
+				if(match) {
+					var before = this.testStr.substr(0, match.index + 1),
+						lineBreaks = (before.match(/\n|\r/g) || []).length;
+					this.positionIndicator(this.matchIndicators[i], match.index + lineBreaks, match.length);
+				}
+				else {
+					throw Error('No match exists at ' + match.index);
+				}
 			}
-			else {
-				throw Error('No match exists at ' + index);
-			}
+			this.setMatchIndicatorsDisplay.bind(this, '')
 		}
 		
 		this.nextSubpattern();
 	},
 	
-	gotoSubpattern: function (index) {
-		if(!this.subpatterns.length) {
-			this.submatchIndicator.style.display = 'none'; 
-		}
-		else {
-			var match = this.matches[this.matches.index],
-			    subpattern = this.subpatterns[index];
-			
-			if (match) {
-				var strIndex = match.subpatterns[0].indexOf(subpattern);
-				
-				if (strIndex === -1) {
-					strIndex = match.subpatterns.input.indexOf(subpattern, match.index) - 1;
-				}
-				
-				var offset = match.index + strIndex;
-				
-				var before = this.testStr.substr(0, offset + 1),
-					lineBreaks = (before.match(/\n|\r/g) || []).length;
-					
-				this.positionIndicator(this.submatchIndicator, offset + lineBreaks, subpattern.length);
-				this.submatchIndicator.style.display = '';
+	gotoSubpattern: function () {
+		var handledSubmatchesCount = 0;
+		for (var i = 0; i < this.matches.length; i++) {
+			var match = this.matches[i];
+			if (!match) {
+				throw Error('No subpattern exists in pattern ' + i);
+			}
+			var subpatterns = match.subpatterns.slice() || [];
+			if(!subpatterns.length) {
+				this.setSubmatchIndicatorsDisplay.bind(this, 'none'); 
 			}
 			else {
-				throw Error('No subpattern exists at ' + index);
+				for (var j = 0; j < subpatterns.length; j++) {
+					var subpattern = subpatterns[j];
+					var strIndex = match.subpatterns[0].indexOf(subpattern);
+					
+					if (strIndex === -1) {
+						strIndex = match.subpatterns.input.indexOf(subpattern, match.index) - 1;
+					}
+					
+					var offset = match.index + strIndex;
+					
+					var before = this.testStr.substr(0, offset + 1),
+						lineBreaks = (before.match(/\n|\r/g) || []).length;
+						
+					// We store the subpatterns in a 1D array, here we have to add an offset to get the proper index.
+					this.positionIndicator(this.submatchIndicators[j + handledSubmatchesCount], offset + lineBreaks, subpattern.length);
+					this.setSubmatchIndicatorsDisplay.bind(this, '');
+				}
+				handledSubmatchesCount += subpatterns.length;
 			}
 		}
 	},
 	
-	nextMatch: function () {
-		var matches = this.matches;
-
-		if(!('index' in matches) || matches.index < 0 || matches.index + 1 >= matches.length) {
-			matches.index = -1;
+	nextMatch: function () {		
+		if (this.matchIndicators) {
+			this.matchIndicators.forEach(function(el) {
+				el.parentNode.removeChild(el);
+			});
 		}
-		
-		this.gotoMatch(++matches.index);
+
+		this.matchIndicators = [];
+
+		for (var i = 0; i < this.matches.length; i++) {
+			this.matchIndicators.push($u.element.create('div', {
+				properties: {
+					className: 'match indicator'
+				},
+				inside: this.tester.parentNode
+			}));
+		}
+
+		this.gotoMatch();
 	},
 	
 	prevMatch: function () {
-		var matches = this.matches;
+		// var matches = this.matches;
 		
-		if(!matches.index) {
-			matches.index = matches.length;
-		}
+		// if(!matches.index) {
+		// 	matches.index = matches.length;
+		// }
 		
-		this.gotoMatch(--matches.index);
+		// this.gotoMatch(--matches.index);
 	},
 	
 	nextSubpattern: function () {
-		if(this.subpatterns === undefined) {
-			this.nextMatch();
+		if (this.submatchIndicators) {
+			this.submatchIndicators.forEach(function(el) {
+				el.parentNode.removeChild(el);
+			});
 		}
-		
-		var matches = this.subpatterns;
 
-		if(!('index' in matches) || matches.index < 0 || matches.index + 1 >= matches.length) {
-			matches.index = -1;
+		this.submatchIndicators = []
+
+		for (var i = 0; i < this.matches.length; i++) {
+			var match = this.matches[i];
+			var subpatterns = match.subpatterns.slice() || [];
+			for (var j = 0; j < subpatterns.length; j++) {
+				this.submatchIndicators.push($u.element.create('div', {
+					properties: {
+						className: 'sub match indicator'
+					},
+					inside: this.tester.parentNode
+				}));
+			}
 		}
-		
-		this.gotoSubpattern(++matches.index);
+		this.gotoSubpattern();
 	},
 	
 	prevSubpattern: function () {
-		var matches = this.subpatterns;
+		// var matches = this.subpatterns;
 		
-		if(!matches.index) {
-			matches.index = matches.length;
-		}
+		// if(!matches.index) {
+		// 	matches.index = matches.length;
+		// }
 		
-		this.gotoSubpattern(--matches.index);
+		// this.gotoSubpattern(--matches.index);
 	}
 };
 
