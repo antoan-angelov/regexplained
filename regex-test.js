@@ -4,9 +4,9 @@
 var _ = self.RegExpTester = function(container){
 	var me = this;
 	
-	var patternAttr = container.getAttribute('data-pattern'),
+	var patternAttr = getParameterByName('pattern') || container.getAttribute('data-pattern'),
 	    initialPattern = RegExp(patternAttr || ''),
-	    initialTest = container.getAttribute('data-test');
+	    initialTest = getParameterByName('test') || container.getAttribute('data-test');
 	
 	this.pattern = RegExp(initialPattern.source); 
 	this.flags = container.getAttribute('data-flags') || 'g';
@@ -105,6 +105,16 @@ var _ = self.RegExpTester = function(container){
 	}
 	else {
 		$u.event.fire([this.input, this.tester], 'input');
+	}
+
+	function getParameterByName(name, url) {
+	    if (!url) url = window.location.href;
+	    name = name.replace(/[\[\]]/g, "\\$&");
+	    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+	        results = regex.exec(url);
+	    if (!results) return null;
+	    if (!results[2]) return '';
+	    return decodeURIComponent(results[2].replace(/\+/g, " "));
 	}
 };
 
