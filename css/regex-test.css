@@ -7,13 +7,16 @@
 		position: relative;
 		display: inline-block;
 		width: 100%;
-		margin-bottom: 4rem;
 		color: hsl(75, 70%, 60%);
 		font: 160%/1 Consolas, Monaco, monospace;
 		white-space: nowrap;
 		overflow: auto;
 		transition-property: color;
 		transition-duration: .3s;
+	}
+
+	.regex-test > .pattern {
+		margin-bottom: 4rem;
 	}
 	
 	.regex-test > div.invalid {
