@@ -101,10 +101,3 @@ section.help {
 	#cheatsheet dfn.long {
 		min-width: 4.5em;
 	}
-
-.tweet.button {
-	position: absolute;
-	left: 1em;
-	bottom: 1em;
-	z-index: 1;
-}
