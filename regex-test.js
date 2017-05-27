@@ -324,16 +324,6 @@ _.prototype = {
 		this.gotoMatch();
 	},
 	
-	prevMatch: function () {
-		// var matches = this.matches;
-		
-		// if(!matches.index) {
-		// 	matches.index = matches.length;
-		// }
-		
-		// this.gotoMatch(--matches.index);
-	},
-	
 	nextSubpattern: function () {
 		if (this.submatchIndicators) {
 			this.submatchIndicators.forEach(function(el) {
@@ -356,16 +346,6 @@ _.prototype = {
 			}
 		}
 		this.gotoSubpattern();
-	},
-	
-	prevSubpattern: function () {
-		// var matches = this.subpatterns;
-		
-		// if(!matches.index) {
-		// 	matches.index = matches.length;
-		// }
-		
-		// this.gotoSubpattern(--matches.index);
 	}
 };
 
