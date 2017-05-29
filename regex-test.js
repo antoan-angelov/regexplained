@@ -9,7 +9,7 @@ var _ = self.RegExpTester = function(container){
 	    initialTest = getParameterByName('test') || container.getAttribute('data-test');
 	
 	this.pattern = RegExp(initialPattern.source); 
-	this.flags = container.getAttribute('data-flags') || 'g';
+	this.flags = getParameterByName('flags') || container.getAttribute('data-flags') || 'g';
 	this.detailed = !container.hasAttribute('data-simple');
 	this.matches = [];
 	
