@@ -221,22 +221,24 @@ _.prototype = {
 		this.matches = [];
 		
 		pattern.lastIndex = 0;
-
 		if (isMatch) {
+			var isGlobal = this.flags.indexOf('g') > -1;
 			// Show exact matches
 			var match;
-			
 			while (match = pattern.exec(test)) {
+				
 				var matches = {
 					index: match.index,
 					length: match[0].length,
 					subpatterns: match
 				};
-
 				this.matches.push(matches);
 				
 				if(matches.length === 0) {
 					pattern.lastIndex++;
+				}
+				if (!isGlobal) {
+					break;
 				}
 			}
 		}
