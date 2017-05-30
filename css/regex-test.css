@@ -7,7 +7,7 @@
 		position: relative;
 		display: inline-block;
 		width: 100%;
-		color: hsl(75, 70%, 60%);
+		color: #B2FF59;
 		font: 160%/1 Consolas, Monaco, monospace;
 		white-space: nowrap;
 		overflow: auto;
@@ -20,7 +20,7 @@
 	}
 	
 	.regex-test > div.invalid {
-		color: #fbb;
+		color: #FF3B3F;
 	}
 	
 		.regex-test > div > div {
