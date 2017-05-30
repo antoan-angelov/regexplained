@@ -118,38 +118,27 @@ var _ = self.RegExpTester = function(container){
 	}
 };
 
-_.supportsCh = (function() {
-	var dummy = document.createElement('_');
-	dummy.style.width = '1ch';
-	return !!dummy.style.width;
-})();
-
-if(_.supportsCh) {
-	_.getCh = function(input) { return (input.value.length || .2) + 'ch'; }
-}
-else {
-	_.getCh = function(input) {
-		var parent = input.parentNode, dummy;
-		
-		dummy = _.getCh.dummy || (_.getCh.dummy = document.createElement('_'));
-		
-		dummy.style.display = 'inline-block';
-		
-		if(dummy.parentNode !== parent) {
-			parent.appendChild(dummy);
-		}
-		
-		// Replace spaces with characters so they don't get collapsed
-		dummy.textContent = input.value.replace(/ /g, 'a');
-		
-		var w = dummy.offsetWidth;
-		
-		dummy.style.display = 'none';
-
-		input.ch = w/input.value.length;
-		
-		return w + 'px';
+_.getCh = function(input) {
+	var parent = input.parentNode, dummy;
+	
+	dummy = _.getCh.dummy || (_.getCh.dummy = document.createElement('_'));
+	
+	dummy.style.display = 'inline-block';
+	
+	if(dummy.parentNode !== parent) {
+		parent.appendChild(dummy);
 	}
+	
+	// Replace spaces with characters so they don't get collapsed
+	dummy.textContent = input.value.replace(/ /g, 'a');
+	
+	var w = dummy.offsetWidth;
+	
+	dummy.style.display = 'none';
+
+	input.ch = w/input.value.length;
+	
+	return w + 'px';
 }
 
 _.fontSize = (function(){
